@@ -3,6 +3,7 @@ package py.edu.uc.lp2.apirest;
 public class Subfusil extends ArmasDeFuego {
     private int precioDinero;
     private int nivelMinimoRequerido;
+    protected String tamaño;
 
     // ... constructores, getters y setters ...
 

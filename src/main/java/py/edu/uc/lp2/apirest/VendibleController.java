@@ -14,7 +14,7 @@ public class VendibleController {
     @GetMapping("/vendibles")
     public ResponseEntity<List<Vendible>> mostrarVendibles() {
         List<Vendible> vendibles = new ArrayList<>();
-        SkinsPersonaje latino = new SkinsPersonaje(123);
+        SkinsPersonaje latino = new SkinsPersonaje(123, 1);
         latino.setDescripcion("Operador y jugador profesional de futbol");
         latino.setNombre("Leo Messi");
         Subfusil subfusil = new Subfusil(1700, 5, "Subfusil compacto y economico", "MP7"); // Assuming Subfusil class exists

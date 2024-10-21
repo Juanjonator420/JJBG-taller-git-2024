@@ -1,12 +1,14 @@
 package py.edu.uc.lp2.apirest;
 
-public class Skin extends Vendible {
+public class Cosmeticos extends Vendible {
     protected double precio;
     protected int rareza;
 
-    public Skin() {}
+    // Constructor, getters y setters
 
-    public Skin(int rareza) {
+    public Cosmeticos() {}
+
+    public Cosmeticos(int rareza) {
         this.rareza = rareza;
     }
     public int getRareza() {
