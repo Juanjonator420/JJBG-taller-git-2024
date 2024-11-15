@@ -1,14 +1,15 @@
 package py.edu.uc.lp2.apirest.rest.controller;
 
+import py.edu.uc.lp2.apirest.domains.Persona;
+import py.edu.uc.lp2.apirest.service.impl.PersonaService;
+import py.edu.uc.lp2.apirest.repository.PersonaRepository;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import py.edu.uc.lp2.apirest.domains.Person;
-import py.edu.uc.lp2.apirest.domains.Persona;
-import py.edu.uc.lp2.apirest.service.impl.PersonaService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,11 +31,6 @@ public class PersonaController {
 
     private static List<Persona> personas = new ArrayList<>();
 
-    static {
-        personas.add(new Persona(1L, "Juan", "Pérez", "123456789", LocalDate.of(2000, 1, 15)));
-        personas.add(new Persona(2L, "María", "Rodríguez", "987654321", LocalDate.of(2010, 5, 20)));
-    }
-
     @Autowired
     public PersonaController(PersonaService personaService) {
         this.personaService = personaService;
@@ -52,9 +48,6 @@ public class PersonaController {
         personas.add(persona);
         return ResponseEntity.status(HttpStatus.CREATED).body("Persona creada exitosamente.");
     }
-
-    @RequestMapping(value = "/personas/bulk", method = RequestMethod.POST)
-    public void addBulk(@RequestBody List<Person> personas) {personaService.saveList(personas);}
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updatePersona(@PathVariable Long id, @RequestBody Persona persona) {
@@ -116,4 +109,16 @@ public class PersonaController {
         }
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<String> addBulk(@RequestBody List<Persona> personas) {
+        try {
+            personaService.saveList(personas);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Personas agregadas exitosamente.");
+        } catch (Exception e) {
+            log.error("Error al agregar personas en bulk", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la solicitud.");
+        }
+    }
+
 }
