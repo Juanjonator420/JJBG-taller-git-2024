@@ -1,19 +1,26 @@
 package py.edu.uc.lp2.apirest.domains;
 
 import java.time.LocalDate;
+import jakarta.persistence.*;
 
-public class Usuario extends Persona{
-    protected String correo;
-    protected String contraseña;
+@Entity
+public class Usuario extends Persona {
+    private String correo;
+    private String contraseña;
 
-    public Usuario(Long id, String nombre, String apellido, String cedula, LocalDate fechaNacimiento) {
-        super(id, nombre, apellido, cedula, fechaNacimiento);
+    // Constructor por defecto
+    public Usuario() {
+        super(); // Llama al constructor por defecto de Persona
     }
 
-    public Usuario(String nombre, String apellido, String cedula) {
-        super(nombre, apellido, cedula);
+    // Constructor completo
+    public Usuario(Long id, String nombre, String apellido, String cedula, int edad, String correo, String contraseña) {
+        super(id, nombre, apellido, cedula, edad);
+        this.correo = correo;
+        this.contraseña = contraseña;
     }
 
+    // Getters y Setters
     public String getCorreo() {
         return correo;
     }
@@ -29,5 +36,4 @@ public class Usuario extends Persona{
     public void setContraseña(String contraseña) {
         this.contraseña = contraseña;
     }
-
 }

@@ -1,5 +1,10 @@
 package py.edu.uc.lp2.apirest.domains;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("Melee")
 public class Melee extends Armas {
     protected String Material;
     protected int Peso;
@@ -22,4 +27,6 @@ public class Melee extends Armas {
     public void setMaterial(String material) {
         Material = material;
     }
+
+
 }

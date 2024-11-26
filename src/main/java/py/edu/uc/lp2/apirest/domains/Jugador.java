@@ -1,12 +1,27 @@
 package py.edu.uc.lp2.apirest.domains;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
 
-public class Jugador extends Usuario{
-    protected int nivel;
-    protected String nickName;
+@Entity
+public class Jugador extends Usuario {
+    private int nivel;
+    private String nickName;
     private String estado;
 
+    // Constructor por defecto
+    public Jugador() {
+        super(); // Llama al constructor por defecto de Usuario
+    }
+
+    // Constructor completo
+    public Jugador(Long id, String nombre, String apellido, String cedula, int edad, String correo, String contraseña, int nivel, String nickName, String estado) {
+        super(id, nombre, apellido, cedula, edad, correo, contraseña);
+        this.nivel = nivel;
+        this.nickName = nickName;
+        this.estado = estado;
+    }
+
+    // Getters y Setters
     public int getNivel() {
         return nivel;
     }
@@ -29,13 +44,5 @@ public class Jugador extends Usuario{
 
     public void setEstado(String estado) {
         this.estado = estado;
-    }
-
-    public Jugador(Long id, String nombre, String apellido, String cedula, LocalDate fechaNacimiento) {
-        super(id, nombre, apellido, cedula, fechaNacimiento);
-    }
-
-    public Jugador(String nombre, String apellido, String cedula) {
-        super(nombre, apellido, cedula);
     }
 }

@@ -1,19 +1,25 @@
 package py.edu.uc.lp2.apirest.domains;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
 
-public class JugadorFREE extends Jugador{
+@Entity
+public class JugadorFREE extends Jugador {
     private boolean anunciosMostrar;
-    private boolean limitadorXP;
+    private int limitadorXP;
 
-    public boolean isLimitadorXP() {
-        return limitadorXP;
+    // Constructor por defecto
+    public JugadorFREE() {
+        super(); // Llama al constructor por defecto de Jugador
     }
 
-    public void setLimitadorXP(boolean limitadorXP) {
+    // Constructor completo
+    public JugadorFREE(Long id, String nombre, String apellido, String cedula, int edad, String correo, String contraseña, int nivel, String nickName, String estado, boolean anunciosMostrar, int limitadorXP) {
+        super(id, nombre, apellido, cedula, edad, correo, contraseña, nivel, nickName, estado);
+        this.anunciosMostrar = anunciosMostrar;
         this.limitadorXP = limitadorXP;
     }
 
+    // Getters y Setters
     public boolean isAnunciosMostrar() {
         return anunciosMostrar;
     }
@@ -22,11 +28,11 @@ public class JugadorFREE extends Jugador{
         this.anunciosMostrar = anunciosMostrar;
     }
 
-    public JugadorFREE(Long id, String nombre, String apellido, String cedula, LocalDate fechaNacimiento) {
-        super(id, nombre, apellido, cedula, fechaNacimiento);
+    public int getLimitadorXP() {
+        return limitadorXP;
     }
 
-    public JugadorFREE(String nombre, String apellido, String cedula) {
-        super(nombre, apellido, cedula);
+    public void setLimitadorXP(int limitadorXP) {
+        this.limitadorXP = limitadorXP;
     }
 }

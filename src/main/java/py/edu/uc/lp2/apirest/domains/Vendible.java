@@ -1,19 +1,19 @@
 package py.edu.uc.lp2.apirest.domains;
 
-import jakarta.persistence.Id;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED) // O SINGLE_TABLE si prefieres una tabla única
+@DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING)
 public class Vendible {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Generación automática de IDs
+    private Long id;
 
     private String categoria;
     protected String nombre;
     protected double precio;
     protected String descripcion;
-    @Id
-    private Long id;
-
-    //constructores...
 
     public Vendible() {
     }
@@ -26,10 +26,12 @@ public class Vendible {
         this.id = id;
     }
 
+
+
     // getters y setters ...
 
-    public Long getId() {
-        return id;
+    public Integer getId() {
+        return Math.toIntExact(id);
     }
 
     public void setId(Long id) {

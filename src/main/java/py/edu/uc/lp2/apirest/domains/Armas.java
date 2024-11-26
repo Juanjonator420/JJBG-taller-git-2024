@@ -1,5 +1,10 @@
 package py.edu.uc.lp2.apirest.domains;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("Armas")
 public class Armas extends Vendible {
     protected int precioDinero;
     protected int nivelMinimoRequerido;

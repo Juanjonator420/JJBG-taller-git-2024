@@ -1,45 +1,31 @@
 package py.edu.uc.lp2.apirest.domains;
 
 import java.io.Serializable;
-
-import java.time.LocalDate;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
-public class Persona implements Serializable {
+@Inheritance(strategy = InheritanceType.JOINED) // Estrategia JOINED
+public class Persona {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private static final long serialVersionUID = -4419931048984717671L;
 
     private String nombre;
     private String apellido;
     private String cedula;
 
-    private LocalDate fechaNacimiento;
+    private int edad; // Nuevo atributo para reemplazar fechaNacimiento
 
-    //Constructors...
-    public Persona(){
+    // Constructor por defecto
+    public Persona() {}
 
-    }
-
-    //constructor completo
-    public Persona(Long id, String nombre, String apellido, String cedula, LocalDate fechaNacimiento) {
+    // Constructor completo
+    public Persona(Long id, String nombre, String apellido, String cedula, int edad) {
         this.id = id;
         this.nombre = nombre;
         this.apellido = apellido;
         this.cedula = cedula;
-        this.fechaNacimiento = fechaNacimiento;
-    }
-
-    public Persona(String nombre, String apellido, String cedula) {
-        this.nombre = nombre;
-        this.apellido = apellido;
-        this.cedula = cedula;
+        this.edad = edad;
     }
 
     // Getters y Setters
@@ -75,11 +61,11 @@ public class Persona implements Serializable {
         this.cedula = cedula;
     }
 
-    public LocalDate getFechaNacimiento() {
-        return fechaNacimiento;
+    public int getEdad() {
+        return edad;
     }
 
-    public void setFechaNacimiento(LocalDate fechaNacimiento) {
-        this.fechaNacimiento = fechaNacimiento;
+    public void setEdad(int edad) {
+        this.edad = edad;
     }
 }

@@ -1,19 +1,25 @@
 package py.edu.uc.lp2.apirest.domains;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
 
-public class JugadorVIP extends Jugador{
-    private float descuentoTienda;
-    protected boolean paseBatalla;
+@Entity
+public class JugadorVIP extends Jugador {
+    private boolean paseBatalla;
+    private double descuentoTienda;
 
-    public float getDescuentoTienda() {
-        return descuentoTienda;
+    // Constructor por defecto
+    public JugadorVIP() {
+        super(); // Llama al constructor por defecto de Jugador
     }
 
-    public void setDescuentoTienda(float descuentoTienda) {
+    // Constructor completo
+    public JugadorVIP(Long id, String nombre, String apellido, String cedula, int edad, String correo, String contraseña, int nivel, String nickName, String estado, boolean paseBatalla, double descuentoTienda) {
+        super(id, nombre, apellido, cedula, edad, correo, contraseña, nivel, nickName, estado);
+        this.paseBatalla = paseBatalla;
         this.descuentoTienda = descuentoTienda;
     }
 
+    // Getters y Setters
     public boolean isPaseBatalla() {
         return paseBatalla;
     }
@@ -22,11 +28,11 @@ public class JugadorVIP extends Jugador{
         this.paseBatalla = paseBatalla;
     }
 
-    public JugadorVIP(String nombre, String apellido, String cedula) {
-        super(nombre, apellido, cedula);
+    public double getDescuentoTienda() {
+        return descuentoTienda;
     }
 
-    public JugadorVIP(Long id, String nombre, String apellido, String cedula, LocalDate fechaNacimiento) {
-        super(id, nombre, apellido, cedula, fechaNacimiento);
+    public void setDescuentoTienda(double descuentoTienda) {
+        this.descuentoTienda = descuentoTienda;
     }
 }

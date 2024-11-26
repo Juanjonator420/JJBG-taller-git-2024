@@ -2,6 +2,7 @@ package py.edu.uc.lp2.apirest.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import py.edu.uc.lp2.apirest.domains.Armas;
 import py.edu.uc.lp2.apirest.domains.Vendible;
 import py.edu.uc.lp2.apirest.repository.VendibleRepository;
 import py.edu.uc.lp2.apirest.service.VendibleService;
@@ -15,6 +16,9 @@ import java.util.Optional;
 public class VendibleServiceImpl implements VendibleService {
 
     private final VendibleRepository vendibleRepository;
+
+    private static final double TARIFA_BASE_ENVIO = 50.0; //costo de envio basico para servicio de envio de armas
+    private static final double TARIFA_MANTENIMIENTO_DANO = 10.0; //costo de mantenimiento de armas
 
     @Autowired
     public VendibleServiceImpl(VendibleRepository vendibleRepository) {
@@ -46,6 +50,7 @@ public class VendibleServiceImpl implements VendibleService {
         return vendibleRepository.saveAll(vendibles);
     }
 
+    @Override
     public double calculateTotalPrice(List<Integer> ids) {
         return vendibleRepository.findAllById(ids)
                 .stream()
@@ -53,6 +58,7 @@ public class VendibleServiceImpl implements VendibleService {
                 .sum();
     }
 
+    @Override //calcula como un carrito la compra de varios items por id's
     public List<Map<String, Object>> calculateTotalPriceWithQuantities(List<Map<String, Object>> vendibleRequests) {
         List<Map<String, Object>> vendibleDetails = new ArrayList<>();
         vendibleRequests.forEach(request -> {
@@ -72,36 +78,43 @@ public class VendibleServiceImpl implements VendibleService {
         return vendibleDetails;
     }
 
+    @Override
     public double calculateGrandTotal(List<Map<String, Object>> vendibleDetails) {
         return vendibleDetails.stream()
                 .mapToDouble(detail -> (double) detail.get("total"))
                 .sum();
     }
 
-    public Vendible updateVendible(Integer id, Vendible updatedVendible) {
-        return vendibleRepository.findById(id)
-                .map(vendible -> {
-                    vendible.setNombre(updatedVendible.getNombre());
-                    vendible.setDescripcion(updatedVendible.getDescripcion());
-                    vendible.setPrecio(updatedVendible.getPrecio());
-                    vendible.setCategoria(updatedVendible.getCategoria());
-                    return vendibleRepository.save(vendible);
-                })
-                .orElseThrow(() -> new RuntimeException("Vendible not found with id " + id));
-    }
-
     @Override
     public void procesarCompra(List<Vendible> vendibles) {
-        // Lógica para procesar una compra, ejemplo:
         vendibles.forEach(vendible -> {
             System.out.println("Procesando compra de " + vendible.getNombre());
-            // Lógica de negocio adicional para procesar la compra
         });
     }
 
     @Override
     public boolean validarListaVendibles(List<Vendible> vendibles) {
-        // Lógica para validar la lista de vendibles, ejemplo:
         return vendibles.stream().allMatch(v -> v.getPrecio() > 0);
+    }
+
+    // Servicio de Envío de armas
+    @Override
+    public double calcularCostoEnvio(Vendible vendible) {
+        double costoEnvio = TARIFA_BASE_ENVIO + (vendible.getPrecio() * 0.1);
+        System.out.println("Costo de envío para " + vendible.getNombre() + ": " + costoEnvio);
+        return costoEnvio;
+    }
+
+    // Servicio de Mantenimiento de armas
+    @Override
+    public double calcularCostoMantenimiento(Vendible vendible) {
+        if (vendible instanceof Armas) {
+            Armas arma = (Armas) vendible;
+            double costoMantenimiento = TARIFA_MANTENIMIENTO_DANO * arma.getDaño();
+            System.out.println("Costo de mantenimiento para " + arma.getNombre() + ": " + costoMantenimiento);
+            return costoMantenimiento;
+        }
+        System.out.println("Mantenimiento no disponible para " + vendible.getNombre());
+        return 0.0;
     }
 }

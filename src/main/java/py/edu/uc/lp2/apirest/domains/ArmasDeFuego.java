@@ -1,5 +1,10 @@
 package py.edu.uc.lp2.apirest.domains;
 
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("ArmasDeFuego")
 public class ArmasDeFuego extends Armas {
     protected int carga;
     protected float cadencia;
@@ -30,4 +35,6 @@ public class ArmasDeFuego extends Armas {
     public void setCarga(int carga) {
         this.carga = carga;
     }
+
+
 }

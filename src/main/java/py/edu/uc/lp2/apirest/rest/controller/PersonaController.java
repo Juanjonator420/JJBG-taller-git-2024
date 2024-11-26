@@ -1,6 +1,9 @@
 package py.edu.uc.lp2.apirest.rest.controller;
 
-import py.edu.uc.lp2.apirest.domains.Persona;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
+import py.edu.uc.lp2.apirest.domains.*;
 import py.edu.uc.lp2.apirest.service.impl.PersonaService;
 import py.edu.uc.lp2.apirest.repository.PersonaRepository;
 
@@ -26,10 +29,7 @@ import java.util.List;
 public class PersonaController {
 
     private static final Logger log = LoggerFactory.getLogger(PersonaController.class);
-
     private final PersonaService personaService;
-
-    private static List<Persona> personas = new ArrayList<>();
 
     @Autowired
     public PersonaController(PersonaService personaService) {
@@ -39,13 +39,12 @@ public class PersonaController {
     @PostMapping
     public ResponseEntity<String> createPersona(@RequestBody Persona persona) {
         log.info("Creando nueva persona: {}", persona);
-        persona.setId(personas.size() + 1L);
 
-        if (!personaService.esMayorDeEdad(persona)) {
+        if (persona.getEdad() < 18) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La persona debe ser mayor de edad.");
         }
 
-        personas.add(persona);
+        personaService.save(persona);
         return ResponseEntity.status(HttpStatus.CREATED).body("Persona creada exitosamente.");
     }
 
@@ -57,67 +56,97 @@ public class PersonaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La persona debe ser mayor de edad.");
         }
 
-        int index = -1;
-        for (int i = 0; i < personas.size(); i++) {
-            if (personas.get(i).getId().equals(id)) {
-                index = i;
-                break;
-            }
-        }
-
-        if (index >= 0) {
-            persona.setId(id);
-            personas.set(index, persona);
-            log.info("Persona actualizada: {}", persona);
-            return ResponseEntity.ok("Persona actualizada exitosamente.");
-        } else {
+        Persona existingPersona = personaService.findById(id);
+        if (existingPersona == null) {
             log.warn("Persona con ID {} no encontrada para actualizar", id);
             return ResponseEntity.notFound().build();
         }
+
+        persona.setId(id);
+        personaService.save(persona);
+        log.info("Persona actualizada: {}", persona);
+        return ResponseEntity.ok("Persona actualizada exitosamente.");
     }
 
     @GetMapping
     public ResponseEntity<List<Persona>> getAllPersonas() {
         log.info("Se ha recibido una solicitud para obtener todas las personas");
-        return ResponseEntity.ok(personas);
+        return ResponseEntity.ok(personaService.getAllPersonas());
     }
 
-    @GetMapping("/{id}")
+    //cita una persona a traves citando su id
+    @GetMapping("/citar-persona/{id}")
     public ResponseEntity<Persona> getPersonaById(@PathVariable Long id) {
         log.info("Buscando persona con ID: {}", id);
-        return personas.stream()
-                .filter(persona -> persona.getId().equals(id))
-                .findFirst()
-                .map(persona -> {
-                    log.info("Persona encontrada: {}", persona);
-                    return ResponseEntity.ok(persona);
-                })
-                .orElseGet(() -> {
-                    log.warn("Persona con ID {} no encontrada", id);
-                    return ResponseEntity.notFound().build();
-                });
+        Persona persona = personaService.findById(id);
+        if (persona != null) {
+            log.info("Persona encontrada: {}", persona);
+            return ResponseEntity.ok(persona);
+        } else {
+            log.warn("Persona con ID {} no encontrada", id);
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @DeleteMapping("/{id}")
+    //endpoint para borrar una persona a traves de su id
+    @DeleteMapping("/borrar-persona/{id}")
     public ResponseEntity<Void> deletePersona(@PathVariable Long id) {
         log.info("Eliminando persona con ID: {}", id);
-        boolean removed = personas.removeIf(persona -> persona.getId().equals(id));
-        if (removed) {
-            log.info("Persona eliminada correctamente");
-        } else {
+        Persona persona = personaService.findById(id);
+        if (persona == null) {
             log.warn("Persona con ID {} no encontrada para eliminar", id);
+            return ResponseEntity.notFound().build();
         }
+
+        personaService.deleteById(id);
+        log.info("Persona eliminada correctamente");
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/bulk")
-    public ResponseEntity<String> addBulk(@RequestBody List<Persona> personas) {
+    //endpoint donde hace bulk y carga multiples datos a la vez para jerarquia de persona
+    @PostMapping("/bulk-personas")
+    public ResponseEntity<String> cargarPersonas(@RequestBody List<Map<String, Object>> personasRaw) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        List<Persona> personas = new ArrayList<>();
+
         try {
-            personaService.saveList(personas);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Personas agregadas exitosamente.");
+            for (Map<String, Object> raw : personasRaw) {
+                String tipo = (String) raw.get("tipo");
+                Persona persona;
+
+                switch (tipo) {
+                    case "Persona":
+                        persona = objectMapper.convertValue(raw, Persona.class);
+                        break;
+                    case "Usuario":
+                        persona = objectMapper.convertValue(raw, Usuario.class);
+                        break;
+                    case "Jugador":
+                        persona = objectMapper.convertValue(raw, Jugador.class);
+                        break;
+                    case "JugadorVIP":
+                        persona = objectMapper.convertValue(raw, JugadorVIP.class);
+                        break;
+                    case "JugadorFREE":
+                        persona = objectMapper.convertValue(raw, JugadorFREE.class);
+                        break;
+                    case "Empleado": // Maneja el tipo Empleado
+                        persona = objectMapper.convertValue(raw, Empleados.class);
+                        break;
+                    default:
+                        return ResponseEntity.badRequest().body("Tipo desconocido: " + tipo);
+                }
+
+                personas.add(persona);
+            }
+
+            personaService.saveAll(personas); //Usar un método que guarde múltiples instancias
+            return ResponseEntity.status(HttpStatus.CREATED).body("Datos cargados correctamente.");
         } catch (Exception e) {
-            log.error("Error al agregar personas en bulk", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al procesar la solicitud.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al procesar el JSON: " + e.getMessage());
         }
     }
 
